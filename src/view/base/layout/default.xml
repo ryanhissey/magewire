@@ -8,6 +8,63 @@
 
     <body>
         <block name="magewire" template="Magewirephp_Magewire::magewire.phtml">
+            <!--
+                Container Usage Guidelines:
+                - Child containers: Use only for their designated purpose
+                - Global container: Loads core dependencies upfront as standalone components
+                - Important: Global container components must NOT depend on Magewire
+            -->
+            <block name="magewire.global"
+                   as="global"
+                   template="Magewirephp_Magewire::js/magewire/global.phtml"
+            >
+                <!-- Intended for injecting the <script> element loading the Magewire JS. -->
+                <!-- Docs: This doesn't have a template because it should be applied per theme specifically
+                           using a layout block reference and a template attribute. -->
+                <block name="magewire.script"
+                       as="script"
+                       template="Magewirephp_Magewire::js/magewire/script.phtml"
+                />
+
+                <!--
+                    Magewire Utilities.
+
+                    Utilities are standalone helper functions that can be used throughout the codebase.
+                    They operate independently from Magewire but can optionally integrate with the
+                    framework when needed.
+                -->
+                <container name="magewire.utilities" as="utilities">
+                    <block name="magewire.utilities.dom"
+                           template="Magewirephp_Magewire::js/magewire/utilities/dom.phtml"
+                    />
+                    <block name="magewire.utilities.loader"
+                           template="Magewirephp_Magewire::js/magewire/utilities/loader.phtml"
+                    />
+                    <block name="magewire.utilities.str"
+                           template="Magewirephp_Magewire::js/magewire/utilities/str.phtml"
+                    />
+
+                    <!-- To ensure custom utilities are rendered after those from the core. -->
+                    <container name="magewire.utilities.after"/>
+                </container>
+
+                <!--
+                    Magewire Addons.
+
+                    Addons complement the framework without depending on it. Each addon functions
+                    independently but can optionally integrate with Magewire when compatibility
+                    is configured.
+                -->
+                <container name="magewire.addons" as="addons">
+                    <block name="magewire.addons.notifier"
+                           template="Magewirephp_Magewire::js/magewire/addons/notifier.phtml"
+                    />
+
+                    <!-- To ensure custom addons are rendered after those from the core. -->
+                    <container name="magewire.addons.after"/>
+                </container>
+            </block>
+
             <container name="magewire.before" as="before">
                 <container name="magewire.alpinejs">
                     <!-- Intended to hold custom AlpineJS code that must render
@@ -81,38 +138,6 @@
                    template="Magewirephp_Magewire::js/magewire/internal.phtml"
             />
 
-            <!-- Intended for injecting the <script> element loading the Magewire JS. -->
-            <!-- Docs: This doesn't have a template because it should be applied per theme specifically
-                       using a layout block reference and a template attribute. -->
-            <block name="magewire.script"
-                   as="script"
-                   template="Magewirephp_Magewire::js/magewire/script.phtml"
-            />
-
-            <!--
-                Magewire Utilities.
-            -->
-            <container name="magewire.utilities" as="utilities">
-                <block name="magewire.utilities.dom"
-                       template="Magewirephp_Magewire::js/magewire/utilities/dom.phtml"
-                />
-                <block name="magewire.utilities.loader"
-                       template="Magewirephp_Magewire::js/magewire/utilities/loader.phtml"
-                />
-                <block name="magewire.utilities.str"
-                       template="Magewirephp_Magewire::js/magewire/utilities/str.phtml"
-                />
-            </container>
-
-            <!--
-                Magewire Addons.
-            -->
-            <container name="magewire.addons" as="addons">
-                <block name="magewire.addons.notifier"
-                       template="Magewirephp_Magewire::js/magewire/addons/notifier.phtml"
-                />
-            </container>
-
             <!--
                 Magewire Directives.
             -->
@@ -137,6 +162,9 @@
                 <block name="magewire.features.support-magewire-rate-limiting"
                        template="Magewirephp_Magewire::js/magewire/features/support-magewire-rate-limiting/support-magewire-rate-limiting.phtml"
                 />
+                <block name="magewire.features.support-backward-compatibility"
+                       template="Magewirephp_Magewire::js/magewire/features/support-backward-compatibility/support-backward-compatibility.phtml"
+                />
             </container>
 
             <container name="magewire.after.internal" as="after.internal"/>
@@ -156,6 +184,11 @@
 
             <!-- Intended for everything else not-related to features or directive. -->
             <container name="magewire.after" as="after"/>
+
+            <!-- Maintains backward compatibility for blocks and containers created in V1. -->
+            <container name="magewire.legacy" as="legacy">
+                <container name="magewire.plugin.scripts"/>
+            </container>
         </block>
     </body>
 </page>

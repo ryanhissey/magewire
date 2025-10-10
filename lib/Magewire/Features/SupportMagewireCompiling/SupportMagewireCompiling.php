@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Magewirephp\Magewire\Features\SupportMagewireCompiling;
 
 use Magento\Framework\View\Element\AbstractBlock;
+use Magento\Framework\View\Element\Template;
 use Magewirephp\Magewire\Component;
 use Magewirephp\Magewire\ComponentHook;
 use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\Compiler\MagewireCompilerFactory;
@@ -30,7 +31,7 @@ class SupportMagewireCompiling extends ComponentHook
         on('magewire:precompile', function (AbstractBlock $block, string $filename, array $dictionary, Component $magewire) {
             $compiler = $magewire->compiler() ?? $magewire->compiler($this->compilerFactory->create());
 
-            return function (array $result) use ($magewire, $compiler) {
+            return function (array $result) use ($magewire, $compiler, $block) {
                 // Although named "filename", this actually represents the full file path,
                 // including the filename and its extension.
                 $path = $result['filename'];
@@ -46,5 +47,19 @@ class SupportMagewireCompiling extends ComponentHook
                 return $result;
             };
         });
+    }
+
+    private function transformToViewPath(Template $block): string
+    {
+        $template = $block->getTemplate();
+        $parts = explode('::', $template);
+
+        if (count($parts) === 2) {
+            $parts[0] = str_replace('_', '/', $parts[0]);
+
+            return implode('/', $parts);
+        }
+
+        return $block->getTemplateFile();
     }
 }

@@ -14,5 +14,4 @@ use Magewirephp\Magewire\ComponentHook;
 
 class SupportMagewireBackwardsCompatibility extends ComponentHook
 {
-    //
 }

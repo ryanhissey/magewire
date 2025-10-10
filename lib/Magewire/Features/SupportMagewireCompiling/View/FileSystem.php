@@ -17,7 +17,7 @@ use Psr\Log\LoggerInterface;
 class FileSystem
 {
     public function __construct(
-        private readonly File $magentoFilesystemDriver,
+        private readonly File $magentoFileSystemDriver,
         private readonly LoggerInterface $logger
     ) {
         //
@@ -26,7 +26,7 @@ class FileSystem
     public function exists(string $path): bool
     {
         try {
-            return $this->magentoFilesystemDriver->isExists($path);
+            return $this->magentoFileSystemDriver->isExists($path);
         } catch (FileSystemException $exception) {
             $this->logger->critical($exception->getMessage(), ['exception' => $exception]);
         }
@@ -39,12 +39,12 @@ class FileSystem
      */
     public function makeDirectory(string $path, int $mode = 0755, bool $recursive = false): void
     {
-        $this->magentoFilesystemDriver->createDirectory($path, $mode);
+        $this->magentoFileSystemDriver->createDirectory($path, $mode);
     }
 
     public function lastModified(string $path): int
     {
-        $stat = $this->magentoFilesystemDriver->stat($path);
+        $stat = $this->magentoFileSystemDriver->stat($path);
 
         return $stat['mtime'];
     }
@@ -54,7 +54,7 @@ class FileSystem
      */
     public function get(string $path): string
     {
-        return $this->magentoFilesystemDriver->fileGetContents($path);
+        return $this->magentoFileSystemDriver->fileGetContents($path);
     }
 
     /**
@@ -62,7 +62,7 @@ class FileSystem
      */
     public function put(string $path, string $contents): void
     {
-        $this->magentoFilesystemDriver->filePutContents($path, $contents);
+        $this->magentoFileSystemDriver->filePutContents($path, $contents);
     }
 
     public function ensureDirectoryExists(string $path): void

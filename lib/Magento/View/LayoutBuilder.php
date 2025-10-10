@@ -27,20 +27,45 @@ class LayoutBuilder implements BuilderInterface
 
     public function __construct(
         private readonly GeneratorPool $generatorPool,
-        private readonly MagentoLayoutFactory $magentoLayoutFactory
+        private readonly MagentoLayoutFactory $magentoLayoutFactory,
+        private readonly LayoutInterface $layout
     ) {
         //
     }
 
-    public function withHandles(array $handles): static
+    public function withHandles(array $handles, bool $merge = true): static
     {
-        $this->handles = array_merge($this->handles, array_values($handles));
+        $handles = array_values($handles);
+        $this->handles = $merge ? array_merge($this->handles, $handles) : $handles;
+
         return $this;
     }
 
     public function withHandle(string $handle): static
     {
         return $this->withHandles([$handle]);
+    }
+
+    public function removeHandles(array|null $handles = null): static
+    {
+        if ($handles) {
+            foreach ($handles as $handle) {
+                $this->removeHandle($handle);
+            }
+
+            return $this;
+        }
+
+        $this->handles = [];
+
+        return $this;
+    }
+
+    public function removeHandle(string $handle): static
+    {
+        unset($this->handles[$handle]);
+
+        return $this;
     }
 
     /**
@@ -53,8 +78,11 @@ class LayoutBuilder implements BuilderInterface
             throw new InvalidArgumentException('Handles array cannot be empty');
         }
 
-        sort($this->handles);
-        $hash = hash('xxh3', json_encode(($this->handles)));
+        // Copy the handles for sorting without removing the current ordering.
+        $handles = $this->handles;
+
+        sort($handles);
+        $hash = hash('xxh3', json_encode(($handles)));
 
         // Early return when a version with the identical handles already exists.
         if (! $force && in_array($hash, $this->builds, true)) {
@@ -73,6 +101,14 @@ class LayoutBuilder implements BuilderInterface
 
         // Store build for option reuse and return the final layout.
         return $this->builds[$hash] = $layout;
+    }
+
+    public function reset(): static
+    {
+        $this->builds = [];
+        $this->handles = [];
+
+        return $this;
     }
 
     /**

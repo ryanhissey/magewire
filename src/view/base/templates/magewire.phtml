@@ -11,24 +11,28 @@ use Magewirephp\Magewire\ViewModel\Magewire as MagewireViewModel;
 /** @internal Do not modify to ensure Magewire continues to function correctly. */
 
 $magewireViewModel = $block->getData('view_model');
-$resolveComponentsViewModel = $magewireViewModel->utils()->magewire()->mechanisms()->resolveComponents();
+
 $templateUtil = $magewireViewModel->utils()->template();
+$layoutUtil = $magewireViewModel->utils()->layout();
+$magewireUtil = $magewireViewModel->utils()->magewire();
+
+$canRequireMagewire = $magewireUtil->canRequireMagewire();
 ?>
+
 <?= $templateUtil->echoCodeComment('start', true) ?>
+<?= $templateUtil->echoCodeComment('global', false, 'container') ?>
+<?= $layoutUtil->getChildHtml($block, 'global', ['require_magewire' => $canRequireMagewire]) ?>
+
 <?= $templateUtil->echoCodeComment('before', false, 'container') ?>
 <?= $block->getChildHtml('before') ?>
 
-<?php if ($resolveComponentsViewModel->doesPageHaveComponents()): ?>
+<?php if ($canRequireMagewire): ?>
     <?= $templateUtil->echoCodeComment('internal before', false, 'container') ?>
     <?= $block->getChildHtml('before.internal') ?>
     <?= $templateUtil->echoCodeComment('script') ?>
     <?= $block->getChildHtml('script') ?>
     <?= $templateUtil->echoCodeComment('internal') ?>
     <?= $block->getChildHtml('internal') ?>
-    <?= $templateUtil->echoCodeComment('utilities', false, 'container') ?>
-    <?= $block->getChildHtml('utilities') ?>
-    <?= $templateUtil->echoCodeComment('addons', false, 'container') ?>
-    <?= $block->getChildHtml('addons') ?>
     <?= $templateUtil->echoCodeComment('directives', false, 'container') ?>
     <?= $block->getChildHtml('directives') ?>
     <?= $templateUtil->echoCodeComment('features', false, 'container') ?>

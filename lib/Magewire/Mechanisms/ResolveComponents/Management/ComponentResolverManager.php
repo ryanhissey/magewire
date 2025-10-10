@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Magewirephp\Magewire\Mechanisms\ResolveComponents;
+namespace Magewirephp\Magewire\Mechanisms\ResolveComponents\Management;
 
 use Exception;
 use Magento\Framework\App\ObjectManager;
@@ -16,9 +16,10 @@ use Magento\Framework\Exception\NotFoundException;
 use Magento\Framework\Exception\RuntimeException;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentResolver\ComponentResolver;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\ResolversCache;
 use Psr\Log\LoggerInterface;
 
-class ComponentResolverManagement
+class ComponentResolverManager
 {
     /**
      * @param array<string, ComponentResolver|string|false|null> $resolvers

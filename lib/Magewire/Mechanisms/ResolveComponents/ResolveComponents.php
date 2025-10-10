@@ -15,13 +15,14 @@ use Magewirephp\Magewire\Component;
 use Magewirephp\Magewire\Mechanisms\HandleRequests\ComponentRequestContext;
 use Magewirephp\Magewire\Exceptions\ComponentNotFoundException;
 use Magewirephp\Magewire\Mechanisms\HandleComponents\ComponentContext;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\ComponentResolverManager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Magewirephp\Magewire\on;
 
 class ResolveComponents
 {
     public function __construct(
-        private readonly ComponentResolverManagement $componentResolverManagement
+        private readonly ComponentResolverManager $componentResolverManagement
     ) {
         //
     }

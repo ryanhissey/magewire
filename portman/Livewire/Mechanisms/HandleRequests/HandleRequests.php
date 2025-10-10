@@ -46,6 +46,11 @@ class HandleRequests extends \Livewire\Mechanisms\HandleRequests\HandleRequests
         return $this->request->getParam(MagewireUpdateRouteFrontend::PARAM_IS_SUBSEQUENT) ?? false;
     }
 
+    public function request(): Http
+    {
+        return $this->request;
+    }
+
     /**
      * @return MagewireUpdateResult|mixed|null
      * @throws ComponentNotFoundException

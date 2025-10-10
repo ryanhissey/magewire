@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Magewirephp\Magewire\Model\View;
 
+use Magewirephp\Magewire\Concerns\WithTagging;
 use Magewirephp\Magewire\Model\View\Fragment\Exceptions\EmptyFragmentException;
 use Magewirephp\Magewire\Model\View\Fragment\Exceptions\FragmentValidationException;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,10 @@ use Throwable;
 
 abstract class Fragment
 {
+    use WithTagging {
+        withTag as private withTagOrigin;
+    }
+
     // Unchanged raw buffer output, if any.
     protected string|bool $raw = false;
     // Flag to indicate whether the fragment is currently buffering output.
@@ -27,8 +32,6 @@ abstract class Fragment
     protected bool $render = true;
     // The current output buffer level, if any.
     protected int|null $level = null;
-    // Fragment alias for better identification.
-    protected string|null $alias = null;
 
     /** @var array<int, callable> $validators */
     private array $validators = [];
@@ -98,25 +101,20 @@ abstract class Fragment
     }
 
     /**
-     * Flag the fragment with a alias for better identification.
-     */
-    public function withAlias(string $alias): static
-    {
-        // Silently avoid an alias is set on certain circumstances.
-        if (! $this->mutable || $this->buffering || is_string($this->alias) || is_string($this->raw)) {
-            return $this;
-        }
-
-        $this->alias = $alias;
-        return $this;
-    }
-
-    /**
      * Avoid output echoing.
      */
     public function mute(): static
     {
         $this->render = false;
+        return $this;
+    }
+
+    public function withTag(string $tag): static
+    {
+        if ($this->canTagFragment($tag)) {
+            return $this->withTagOrigin($tag);
+        }
+
         return $this;
     }
 
@@ -126,14 +124,6 @@ abstract class Fragment
     protected function getRawOutput(): string
     {
         return $this->raw === false ? '' : $this->raw;
-    }
-
-    /**
-     * Retrieve the fragment alias (if set).
-     */
-    protected function getAlias(): string|null
-    {
-        return $this->alias;
     }
 
     /**
@@ -260,5 +250,17 @@ abstract class Fragment
         }
 
         return $this;
+    }
+
+    private function canTagFragment(string|null $tag = null): bool
+    {
+        if (is_string($tag) && $this->hasTags([$tag])) {
+            return false;
+        }
+        if (! $this->mutable || $this->buffering || is_string($this->raw)) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -68,12 +68,12 @@
                     <item name="data" xsi:type="array">
                         <item name="script" xsi:type="array">
                             <item name="file_path" xsi:type="string">
-                                Magewirephp_Magewire::js/magewire.min.js
+                                Magewirephp_Magewire::js/magewire.csp.min.js
                             </item>
 
                             <item name="query_params" xsi:type="array">
                                 <!-- See: web/js/manifest.json -->
-                                <item name="id" xsi:type="string">df3a17f2</item>
+                                <item name="id" xsi:type="string">69cd902e</item>
                             </item>
 
                             <item name="html_attributes" xsi:type="array">
@@ -401,7 +401,7 @@
         Layout XML and blocks, using the "magewire" argument. A Layout Resolver manages both the construction during
         page load and the reconstruction during a component update request.
     -->
-    <type name="Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentResolverManagement">
+    <type name="Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\ComponentResolverManager">
         <arguments>
             <!-- Component resolver registration. -->
             <argument name="resolvers" xsi:type="array">

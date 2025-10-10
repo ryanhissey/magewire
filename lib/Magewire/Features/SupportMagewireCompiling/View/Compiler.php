@@ -54,9 +54,10 @@ abstract class Compiler
     /**
      * Compile the view at the given path.
      */
-    final public function compile(string $path): string
+    final public function compile(string $path, string|null $final = null): string
     {
         $contents = $this->compileString($this->filesystem()->get($path));
+        $path = $final ?? $path;
 
         $this->filesystem()->ensureDirectoryExists($path = $this->generateFilePath($path));
         $this->filesystem()->put($path, $contents);

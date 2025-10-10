@@ -13,12 +13,14 @@ namespace Magewirephp\Magewire\Features\SupportMagewireBackwardsCompatibility;
 use Magewirephp\Magewire\Model\Concern\BrowserEvent as BrowserEventConcern;
 use Magewirephp\Magewire\Model\Concern\Emit as EmitConcern;
 use Magewirephp\Magewire\Model\Concern\Error as ErrorConcern;
+use Magewirephp\Magewire\Model\Concern\Request as RequestConcern;
 
 trait HandlesComponentBackwardsCompatibility
 {
     use ErrorConcern;
     use BrowserEventConcern;
     use EmitConcern;
+    use RequestConcern;
 
     /**
      * Component id.

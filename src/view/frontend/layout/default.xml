@@ -19,7 +19,8 @@
         </referenceContainer>
 
         <referenceContainer name="magewire.disabled">
-            <!-- Fallback: Loads AlpineJS when Magewire is disabled. -->
+            <!-- Fallback: Loads AlpineJS when Magewire is disabled. When AlpineJS is loaded differently, either remove
+                 this block or change its template to match the themes preference. -->
             <block name="magewire.alpinejs.script"
                    template="Magewirephp_Magewire::js/alpinejs.phtml"
             />

@@ -15,7 +15,6 @@ use Magento\Framework\Exception\RuntimeException;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\LayoutInterface;
-use Magewirephp\Magento\View\LayoutBuilder;
 use Magewirephp\Magewire\Component;
 use Magewirephp\Magewire\Exceptions\ComponentNotFoundException;
 use Magewirephp\Magewire\Mechanisms\HandleComponents\ComponentContext;
@@ -23,6 +22,7 @@ use Magewirephp\Magewire\Mechanisms\HandleComponents\Snapshot;
 use Magewirephp\Magewire\Mechanisms\HandleRequests\ComponentRequestContext;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentArguments\MagewireArguments;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentArguments\LayoutBlockArgumentsFactory;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\LayoutManager;
 use Magewirephp\Magewire\Support\Conditions;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Magewirephp\Magewire\on;
@@ -32,9 +32,9 @@ class LayoutResolver extends ComponentResolver
     protected string $accessor = 'layout';
 
     public function __construct(
-        protected readonly Conditions $conditions,
-        protected readonly LayoutBlockArgumentsFactory $layoutBlockArgumentsFactory,
-        protected readonly LayoutBuilder $layoutBuilder
+        protected Conditions $conditions,
+        protected LayoutBlockArgumentsFactory $layoutBlockArgumentsFactory,
+        protected LayoutManager $layoutManager
     ) {
         parent::__construct($this->conditions);
     }
@@ -92,8 +92,13 @@ class LayoutResolver extends ComponentResolver
 
         // Register a dehydrate listener to attach necessary layout handles to the server memo.
         on('dehydrate', function (Component $component, ComponentContext $context) {
-            if ($component->resolver()->getAccessor() === $this->getAccessor()) {
-                $this->memorizeLayoutHandles($context);
+            $resolver = $component->resolver();
+
+            if ($resolver->getAccessor() === $this->getAccessor()) {
+                if ($this->canMemorizeLayoutHandles()) {
+                    $handles = $context->getBlock()->getLayout()->getUpdate()->getHandles();
+                    $context->addMemo('handles', array_values($handles));
+                }
 
                 if ($alias = $component->block()->getData('magewire:alias')) {
                     $context->addMemo('alias', $alias);
@@ -127,6 +132,8 @@ class LayoutResolver extends ComponentResolver
         $handles = $this->recoverLayoutHandles($snapshot);
         // Build the complete layout structure by processing the recovered handles into renderable blocks.
         $layout = $this->generateBlocks($handles);
+        // Swap the layout instance with the newly build layout instance.
+        $this->layoutManager->layout($layout);
 
         /** @var Template|false $block */
         $block = $layout->getBlock($alias ?? $name);
@@ -174,7 +181,7 @@ class LayoutResolver extends ComponentResolver
      */
     protected function generateBlocks(array $handles): LayoutInterface
     {
-        return $this->layoutBuilder->withHandles($handles)->build();
+        return $this->layoutManager->builder()->reset()->withHandles($handles)->build();
     }
 
     protected function isBlock(mixed $block): bool
@@ -184,21 +191,14 @@ class LayoutResolver extends ComponentResolver
 
     protected function recoverLayoutHandles(Snapshot $snapshot): array
     {
-        return $snapshot->getMemoValue('handles') ?? [];
+        if ($this->canMemorizeLayoutHandles()) {
+            return $snapshot->getMemoValue('handles') ?? [];
+        }
+
+        return [];
     }
 
-    /**
-     * @throws LocalizedException
-     */
-    protected function memorizeLayoutHandles(ComponentContext $context): ComponentContext
-    {
-        $handles = $context->getBlock()->getLayout()->getUpdate()->getHandles();
-        $context->addMemo('handles', array_values($handles));
-
-        return $context;
-    }
-
-    protected function canShareHandles(): bool
+    protected function canMemorizeLayoutHandles(): bool
     {
         return true;
     }

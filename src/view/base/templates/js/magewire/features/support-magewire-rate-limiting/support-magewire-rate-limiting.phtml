@@ -19,7 +19,7 @@ $magewireFragment = $magewireViewModel->utils()->fragment();
 <?php $script = $magewireFragment->make()->script()->start() ?>
 <script>
     document.addEventListener('magewire:init', event => {
-        const { addons } = event.detail.magewire;
+        const addons = window.MagewireAddons;
 
         Magewire.hook('request', ({ fail }) => {
             fail(({ status, preventDefault }) => {

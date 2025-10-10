@@ -12,9 +12,11 @@ use Magewirephp\Magewire\ViewModel\Magewire as MagewireViewModel;
 
 $magewireViewModel = $block->getData('view_model');
 $magewireUtility = $magewireViewModel->utils()->magewire();
+
 ?>
 <script
+    id="magewire-script"
     src="<?= $escaper->escapeUrl($magewireUtility->mechanisms()->frontendAssets()->getScriptPath()) ?>"
     x-data="magewireScript"
-    x-bind="magewireScriptBindings({ csrfToken: hyva.getFormKey() })"
+    x-bind="magewireScriptBindings"
 ></script>

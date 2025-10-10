@@ -16,22 +16,27 @@ use Magewirephp\Magewire\Mechanisms\HandleRequests\HandleRequests as HandleReque
 
 class HandleRequestFacade
 {
-    function __construct(
+    public function __construct(
         private readonly HandleRequestsMechanism $mechanism
     ) {
         //
+    }
+
+    public function mechanism(): HandleRequestsMechanism
+    {
+        return $this->mechanism;
     }
 
     /**
      * @throws NoSuchEntityException
      * @throws ComponentNotFoundException
      */
-    function update()
+    public function update()
     {
         return $this->mechanism->handleUpdate();
     }
 
-    function getUpdateUri(): string
+    public function getUpdateUri(): string
     {
         return $this->mechanism->getUpdateUri();
     }

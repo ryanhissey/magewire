@@ -9,16 +9,13 @@
 
         <!-- REFERENCES -->
         <!-- Disable loading Alpine.js separately through the theme since it is already included with Magewire. -->
-        <referenceBlock name="script-alpine-js"
-                        template="Magewirephp_MagewireCompatibilityWithHyva::js/disable-alpinejs.phtml"
-        />
+        <referenceBlock name="script-alpine-js" template="Magewirephp_MagewireCompatibilityWithHyva::js/conditional-alpinejs.phtml"/>
+
         <!-- Injecting a Hyvä specific way of loading the Magewire JS-lib. -->
-        <referenceBlock name="magewire.script"
-                        template="Magewirephp_MagewireCompatibilityWithHyva::js/magewire/script.phtml"
-        />
+        <referenceBlock name="magewire.script" template="Magewirephp_MagewireCompatibilityWithHyva::js/magewire/script.phtml"/>
 
         <referenceContainer name="magewire.disabled">
-            <block name="magewire.alpinejs.script" template="Hyva_Theme::page/js/alpinejs.phtml"/>
+            <block name="script-alpine-js-test" template="Hyva_Theme::page/js/alpinejs.phtml"/>
         </referenceContainer>
 
         <referenceContainer name="magewire.features">

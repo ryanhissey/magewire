@@ -12,7 +12,7 @@ namespace Magewirephp\Magewire\Features\SupportMagewireNestingComponents;
 
 use Magento\Framework\View\Element\AbstractBlock;
 use Magewirephp\Magewire\ComponentHook;
-use Magewirephp\Magewire\Mechanisms\ResolveComponents\RenderLifecycleManager;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\RenderLifecycleManager;
 use function Magewirephp\Magewire\on;
 
 class SupportMagewireNestingComponents extends ComponentHook

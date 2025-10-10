@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Magewirephp\Magewire\Mechanisms\ResolveComponents;
+namespace Magewirephp\Magewire\Mechanisms\ResolveComponents\Management;
 
 use Magewirephp\Magewire\Component;
 

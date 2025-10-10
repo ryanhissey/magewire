@@ -355,7 +355,7 @@
         Layout XML and blocks, using the "magewire" argument. A Layout Resolver manages both the construction during
         page load and the reconstruction during a component update request.
     -->
-    <type name="Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentResolverManagement">
+    <type name="Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\ComponentResolverManager">
         <arguments>
             <!-- Component resolver registration. -->
             <argument name="resolvers" xsi:type="array">

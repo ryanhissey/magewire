@@ -18,9 +18,9 @@ trait WithTagging
     /**
      * Tag a fragment with a recognizable name.
      */
-    public function tag(string $name): static
+    public function withTag(string $tag): static
     {
-        $sanitized = preg_replace('/[^a-z0-9]/', '', strtolower($name));
+        $sanitized = preg_replace('/[^a-z0-9]/', '', strtolower($tag));
 
         if ($sanitized !== '') {
             $this->tags[] = $sanitized;
@@ -40,18 +40,41 @@ trait WithTagging
     }
 
     /**
-     * Returns if the given tag exists.
+     * Define multiple tags.
      */
-    public function hasTag(string $name): bool
+    public function withTags(array $tags): static
     {
-        return is_string($this->tags[$name] ?? null);
+        foreach ($tags as $tag) {
+            if ($this->hasTags([$tag])) {
+                continue;
+            }
+
+            $this->withTag($tag);
+        }
+
+        return $this;
     }
 
     /**
-     * Returns if any tags were set.
+     * Retrieve the fragment alias (if set).
      */
-    public function hasTags(): bool
+    public function getTags(): array
     {
-        return count($this->tags) > 0;
+        return $this->tags;
+    }
+
+    /**
+     * Retrieve if the fragment possesses an alias.
+     */
+    public function hasTags(array $tags = [], bool $strict = false): bool
+    {
+        if (empty($tags)) {
+            return false;
+        }
+        if ($strict) {
+            return empty(array_diff($tags, $this->tags));
+        }
+
+        return ! empty(array_intersect($this->tags, $tags));
     }
 }

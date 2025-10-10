@@ -53,4 +53,12 @@ class Magewire implements UtilsInterface
     {
         return '/magewire/update';
     }
+
+    /**
+     * Returns if Magewire should be loaded.
+     */
+    public function canRequireMagewire(): bool
+    {
+        return $this->mechanisms()->resolveComponents()->doesPageHaveComponents();
+    }
 }

@@ -22,7 +22,7 @@ $magewireFragment = $magewireViewModel->utils()->fragment();
     function magewireNotifier() {
         'use strict';
 
-        const notifier = Magewire.addons.notifier;
+        const notifier = window.MagewireAddons.notifier;
 
         return {
             get notifications() {
@@ -40,8 +40,15 @@ $magewireFragment = $magewireViewModel->utils()->fragment();
                     item: {
                         root: function() {
                             return {
-                                'x-on:click'() {
-                                    notifier.terminate(this.notification.id);
+                                'x-on:click'(event) {
+                                    let preventDefaultResult = false;
+                                    let preventDefault = () => preventDefaultResult = true;
+
+                                    this.notification.hooks.onClick({ event, preventDefault })
+
+                                    if (preventDefaultResult === false) {
+                                        notifier.terminate(this.notification.id);
+                                    }
                                 },
                                 'x-on:mouseenter'() {
                                     notifier.hold(this.notification.id);
