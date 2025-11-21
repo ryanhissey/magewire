@@ -27,7 +27,8 @@ return [
                     'Mechanisms/HandleComponents/{BaseRenderless,CorruptComponent,ViewContext}*',
                     'Mechanisms/RenderComponent.php',
                     'Component.php',
-                    'LivewireServiceProvider.php'
+                    'LivewireServiceProvider.php',
+                    'Features/SupportRedirects/Redirector.php'
                 ]
             ]
         ],
@@ -67,7 +68,7 @@ return [
         ]
     ],
     'post-processors' => [
-        'rector' => true,
-        'php-cs-fixer' => true
+        'rector' => false,
+        'php-cs-fixer' => false
     ]
 ];

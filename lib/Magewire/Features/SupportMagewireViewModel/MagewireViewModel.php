@@ -21,7 +21,7 @@ class MagewireViewModel implements ArgumentInterface
         //
     }
 
-    public function utils(string $name = null, array $arguments = []): ViewUtils
+    public function utils(string|null $name = null, array $arguments = []): ViewUtils
     {
         return $name ? $this->utils->$name($arguments) : $this->utils;
     }
