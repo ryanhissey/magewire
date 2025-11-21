@@ -27,7 +27,8 @@ return [
                     'Mechanisms/HandleComponents/{BaseRenderless,CorruptComponent,ViewContext}*',
                     'Mechanisms/RenderComponent.php',
                     'Component.php',
-                    'LivewireServiceProvider.php'
+                    'LivewireServiceProvider.php',
+                    'Features/SupportRedirects/Redirector.php'
                 ]
             ]
         ],
