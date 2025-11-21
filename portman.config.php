@@ -67,7 +67,7 @@ return [
         ]
     ],
     'post-processors' => [
-        'rector' => true,
-        'php-cs-fixer' => true
+        'rector' => false,
+        'php-cs-fixer' => false
     ]
 ];
