@@ -18,7 +18,7 @@ use Magewirephp\Magewire\Component;
 
 class ComponentContext extends \Livewire\Mechanisms\HandleComponents\ComponentContext
 {
-    function __construct(
+    public function __construct(
         public $block,
         public $component,
         public $mounting = false,
@@ -31,46 +31,46 @@ class ComponentContext extends \Livewire\Mechanisms\HandleComponents\ComponentCo
             ?? ObjectManager::getInstance()->create(Memo::class);
     }
 
-    function setEffects(Effects $effects)
+    public function setEffects(Effects $effects)
     {
         $this->effects = $effects;
 
         return $this;
     }
 
-    function setMemo(Memo $memo)
+    public function setMemo(Memo $memo)
     {
         $this->memo = $memo;
 
         return $this;
     }
 
-    function getEffects(): Effects
+    public function getEffects(): Effects
     {
         return $this->effects;
     }
 
-    function getMemo(): Memo
+    public function getMemo(): Memo
     {
         return $this->memo;
     }
 
-    function getComponent(): Component
+    public function getComponent(): Component
     {
         return $this->component;
     }
 
-    function getBlock(): AbstractBlock
+    public function getBlock(): AbstractBlock
     {
         return $this->block;
     }
 
-    function addEffect($key, $value)
+    public function addEffect($key, $value)
     {
         $this->getEffects()->setData($key, $value);
     }
 
-    function pushEffect($key, $value, $iKey = null)
+    public function pushEffect($key, $value, $iKey = null)
     {
         $effects = $this->getEffects()->getData();
 
@@ -89,12 +89,17 @@ class ComponentContext extends \Livewire\Mechanisms\HandleComponents\ComponentCo
         return $this;
     }
 
-    function addMemo($key, $value)
+    public function hasEffect($key): bool
+    {
+        return $this->getEffects()->hasData($key);
+    }
+
+    public function addMemo($key, $value)
     {
         $this->getMemo()->setData($key, $value);
     }
 
-    function pushMemo($key, $value, $iKey = null)
+    public function pushMemo($key, $value, $iKey = null)
     {
         $memo = $this->getMemo()->getData();
 

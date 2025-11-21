@@ -180,6 +180,21 @@ class DataArray implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
+     * Returns collection items as json.
+     *
+     * @param callable|null $filter
+     * @return string
+     */
+    public function json(callable|null $filter = null): string
+    {
+        if ($filter) {
+            return json_encode($this->fetch($filter));
+        }
+
+        return json_encode($this->items);
+    }
+
+    /**
      * Returns a filtered items collection.
      */
     public function fetch(callable $filter): array

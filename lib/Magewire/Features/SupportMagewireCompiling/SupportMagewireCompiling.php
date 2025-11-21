@@ -28,7 +28,7 @@ class SupportMagewireCompiling extends ComponentHook
 
     public function provide(): void
     {
-        on('magewire:precompile', function (AbstractBlock $block, string $filename, array $dictionary, Component $magewire) {
+        on('magewire:view:precompile', function (AbstractBlock $block, string $filename, array $dictionary, Component $magewire) {
             $compiler = $magewire->compiler() ?? $magewire->compiler($this->compilerFactory->create());
 
             return function (array $result) use ($magewire, $compiler, $block) {
@@ -49,6 +49,16 @@ class SupportMagewireCompiling extends ComponentHook
         });
     }
 
+    /**
+     * WIP
+     *
+     * Generate a readable file structure for generated files.
+     *
+     * Instead of unreadable filenames, create organized directories that map to source files,
+     * making it easier for developers to locate and debug generated output.
+     *
+     * TODO: Consider enabling this only in development mode.
+     */
     private function transformToViewPath(Template $block): string
     {
         $template = $block->getTemplate();

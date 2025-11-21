@@ -102,6 +102,13 @@ class Html extends Fragment
 
     protected function getAreaAttributes(string $area): array
     {
+        if ($area === 'root') {
+            // Filter those who are not an 'area' (an array value).
+            $attributes = array_filter($this->attributes, fn ($value) => ! is_array($value));
+
+            return array_merge($this->attributes[$area] ?? [], $attributes);
+        }
+
         return $this->attributes[$area] ?? [];
     }
 }

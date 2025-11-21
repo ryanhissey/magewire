@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Magewirephp\Magewire\Controller;
 
 use Exception;
+use Magento\Framework\Exception\FileSystemException;
 use Magewirephp\Magewire\Mechanisms\HandleComponents\Checksum;
 use Magento\Framework\App\Action\Forward;
 use Magento\Framework\App\ActionFactory;
@@ -22,7 +23,9 @@ use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Webapi\ServiceInputProcessor;
 use Magewirephp\Magento\App\Router\MagewireRouteValidator;
 use Magewirephp\Magewire\MagewireServiceProvider;
+use Magewirephp\Magewire\Mechanisms\HandleComponents\CorruptComponentPayloadException;
 use Magewirephp\Magewire\Mechanisms\HandleRequests\ComponentRequestContext;
+use Magewirephp\Magewire\Mode;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use function Magewirephp\Magewire\trigger;
@@ -53,17 +56,19 @@ abstract class MagewireUpdateRoute extends MagewireRoute
             return null;
         }
 
-        // Mark the request as a subsequent Magewire request.
-        $request->setParam(self::PARAM_IS_SUBSEQUENT, true);
-
         /**
-         * Magewire has two trigger points for booting itself. One occurs during the updating of components.
-         * This is the only feasible location, after confirming we are on an update request,
-         * where we should attempt to boot. [2/2]
+         * Boot Magewire and initialize the request context.
+         *
+         * Magewire has two trigger points for initialization:
+         * 1. During component updates (the only feasible location after confirming an update request)
+         * 2. During page load via the view block observer
+         *
+         * This call marks the request as "subsequent" to distinguish between initial page loads
+         * and subsequent update requests, allowing system-wide determination of Magewire's state.
          *
          * @see \Magewirephp\Magewire\Observer\ViewBlockAbstractToHtmlBefore
          */
-        $this->magewireServiceProvider->boot();
+        $this->magewireServiceProvider->boot(Mode::SUBSEQUENT);
 
         try {
             $request->setParams($this->parseRequest($request));
@@ -77,6 +82,9 @@ abstract class MagewireUpdateRoute extends MagewireRoute
 
     /**
      * @throws LocalizedException
+     * @throws FileSystemException
+     * @throws \Magento\Framework\Exception\RuntimeException
+     * @throws CorruptComponentPayloadException
      */
     protected function parseRequest(RequestInterface $request): array
     {

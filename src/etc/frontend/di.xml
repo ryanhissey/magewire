@@ -143,7 +143,10 @@
 
                 <!-- HIGHEST PRIORITIY: Do not register features above this sort order range. -->
                 <item name="lifecycle_hooks" xsi:type="string" sortOrder="99000">Magewirephp\Magewire\Features\SupportLifecycleHooks\SupportLifecycleHooks</item>
-                <item name="magewire_backwards_compatibility" xsi:type="string" sortOrder="99050">Magewirephp\Magewire\Features\SupportMagewireBackwardsCompatibility\SupportMagewireBackwardsCompatibility</item>
+                <item name="magewire_backwards_compatibility" xsi:type="array">
+                    <item name="type" xsi:type="string">Magewirephp\Magewire\Features\SupportMagewireBackwardsCompatibility\SupportMagewireBackwardsCompatibility</item>
+                    <item name="sort_order" xsi:type="number">99050</item>
+                </item>
 
                 <item name="magewire_flakes" xsi:type="array">
                     <item name="type" xsi:type="string">Magewirephp\Magewire\Features\SupportMagewireFlakes\SupportMagewireFlakes</item>

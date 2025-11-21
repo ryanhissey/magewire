@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Magewirephp\Magewire\Features\SupportMagewireFlakes\View\Precompiler;
 
+use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\DirectiveHandover;
 use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\Precompiler;
 use Magewirephp\Magewire\Support\DataArray;
 use Magewirephp\Magewire\Support\Parser\DomElementParser;
@@ -38,29 +39,80 @@ class FlakePrecompiler extends Precompiler
         $length = strlen($value);
 
         while ($pos < $length) {
+            // Try to match self-closing tag: <magewire:component ... />
             if (preg_match('/<magewire:([a-zA-Z0-9\-_.]+)((?:[^>\/]|\/(?!>))*)\s*\/\s*>/', $value, $match, 0, $pos)) {
+                $tagStart = strpos($value, $match[0], $pos);
+
+                // Check if there's an opening tag before this position
+                $nextOpeningMatch = preg_match(
+                    '/<magewire:([a-zA-Z0-9\-_.]+)((?:[^>\/]|\/(?!>))*)\s*>/',
+                    $value,
+                    $openingMatch,
+                    0,
+                    $pos
+                );
+                $nextOpeningPos = $nextOpeningMatch ? strpos($value, $openingMatch[0], $pos) : PHP_INT_MAX;
+
+                // If self-closing tag comes first, process it
+                if ($tagStart <= $nextOpeningPos) {
+                    $component = $match[1];
+                    $attributes = $match[2];
+
+                    // Append content before the tag
+                    $result .= substr($value, $pos, $tagStart - $pos);
+
+                    // Compile the self-closing tag
+                    $compiled = $this->compileFlake([
+                        $match[0], // Full self-closing tag
+                        $component,
+                        $attributes,
+                        false
+                    ]);
+
+                    $result .= $compiled;
+                    $pos = $tagStart + strlen($match[0]);
+                    continue;
+                }
+            }
+
+            // Try to match opening tag: <magewire:component ...>
+            if (preg_match('/<magewire:([a-zA-Z0-9\-_.]+)((?:[^>\/]|\/(?!>))*)\s*>/', $value, $match, 0, $pos)) {
                 $tagStart = strpos($value, $match[0], $pos);
                 $component = $match[1];
                 $attributes = $match[2];
+                $openingTagEnd = $tagStart + strlen($match[0]);
 
-                // Append content before the tag
-                $result .= substr($value, $pos, $tagStart - $pos);
+                // Find the corresponding closing tag.
+                $closingTagPattern = '/<\/magewire:' . preg_quote($component) . '\s*>/';
 
-                // Compile the self-closing tag
-                $compiled = $this->compileFlake([
-                    $match[0], // Full self-closing tag
-                    $component,
-                    $attributes,
-                    '' // Empty content for self-closing tags
-                ]);
+                if (preg_match($closingTagPattern, $value, $closingMatch, 0, $openingTagEnd)) {
+                    $closingTagStart = strpos($value, $closingMatch[0], $openingTagEnd);
+                    $content = substr($value, $openingTagEnd, $closingTagStart - $openingTagEnd);
+                    $closingTagEnd = $closingTagStart + strlen($closingMatch[0]);
 
-                $result .= $compiled;
-                $pos = $tagStart + strlen($match[0]);
-            } else {
-                // No more self-closing magewire tags found, append the rest
-                $result .= substr($value, $pos);
-                break;
+                    // Append content before the tag.
+                    $result .= substr($value, $pos, $tagStart - $pos);
+                    // Recursively parse nested magewire tags in content.
+                    [$content, $changes] = $this->parseTags($content, $iterations + 1, $maxIterations);
+                    // Compile the opening/closing tag with content.
+                    $fullTag = substr($value, $tagStart, $closingTagEnd - $tagStart);
+
+                    $compiled = $this->compileFlake([
+                        $fullTag, // Full tag with content
+                        $component,
+                        $attributes,
+                        empty($content) ? false : $content // Actual content between tags
+                    ]);
+
+                    $result .= $compiled;
+                    $pos = $closingTagEnd;
+                    continue;
+                }
             }
+
+            // No more magewire tags found, append the rest
+            $result .= substr($value, $pos);
+            break;
         }
 
         return [$result, $result !== $value];
@@ -70,6 +122,7 @@ class FlakePrecompiler extends Precompiler
     {
         $component = $matches[1];
         $attributes = trim($matches[2]);
+        $content = $matches[3];
 
         $parse = $this->domElementParser->newInstance()
 
@@ -123,7 +176,7 @@ class FlakePrecompiler extends Precompiler
         ];
 
         // Transform <x-{component} into a uniform @-directive.
-        return '@flake(arguments: ' . base64_encode(serialize($arguments)) . ')';
+        return '@flake(arguments: ' . json_encode($arguments) . ')';
     }
 
     private function renameToMagewireAttributeMeta(string $attribute): string|null

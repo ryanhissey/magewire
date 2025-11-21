@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace Magewirephp\Magento\View\Layout\ScheduledStructure;
+namespace Magewirephp\Magento\Framework\View\Layout\ScheduledStructure;
 
 use Magento\Framework\View\Layout\ScheduledStructure;
 use Magento\Framework\View\Layout\Data\Structure;
@@ -61,7 +61,7 @@ class Helper extends ScheduledStructure\Helper
 
         /*
          * Some elements provide info "after" or "before" which sibling they are supposed to go
-         * Add element into list of sorting
+         * Add an element into a list of sorting
          */
         if ($siblingName) {
             $scheduledStructure->setElementToSortList($parentName, $name, $siblingName, $isAfter);

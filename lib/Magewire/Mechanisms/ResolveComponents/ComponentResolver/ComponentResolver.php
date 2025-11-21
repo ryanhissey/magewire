@@ -15,6 +15,7 @@ use Magento\Framework\View\Element\AbstractBlock;
 use Magewirephp\Magewire\Component;
 use Magewirephp\Magewire\Mechanisms\HandleRequests\ComponentRequestContext;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentArguments\MagewireArguments;
+use Magewirephp\Magewire\Support\Concerns\WithFactory;
 use Magewirephp\Magewire\Support\Conditions;
 
 /**
@@ -25,6 +26,8 @@ use Magewirephp\Magewire\Support\Conditions;
  */
 abstract class ComponentResolver
 {
+    use WithFactory;
+
     public const RESOLVER = 'magewire:resolver';
 
     /**

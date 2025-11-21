@@ -41,8 +41,6 @@ class UpdateRequestRateLimiter extends RateLimiter
     {
         $key = $this->generateKeyByComponent($component);
 
-        $component->tap();
-
         if ($result = $this->validate($key, 4, 5)) {
             $this->hit($key);
         }

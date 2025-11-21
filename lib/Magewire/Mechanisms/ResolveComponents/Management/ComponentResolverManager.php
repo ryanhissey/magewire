@@ -16,6 +16,8 @@ use Magento\Framework\Exception\NotFoundException;
 use Magento\Framework\Exception\RuntimeException;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentResolver\ComponentResolver;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentResolver\ComponentResolverFactory;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\ComponentResolverNotFoundException;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\ResolversCache;
 use Psr\Log\LoggerInterface;
 
@@ -27,6 +29,7 @@ class ComponentResolverManager
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly ResolversCache $resolversCache,
+        private readonly ComponentResolverFactory $componentResolverFactory,
         private array $resolvers = []
     ) {
         $this->resolvers = array_filter($this->resolvers, fn ($resolver) => is_object($resolver) || is_string($resolver));
@@ -51,7 +54,7 @@ class ComponentResolverManager
          * The resolver is determined through one of the following options:
          *
          * 1. The resolver is manually assigned via a Magewire resolver argument,
-         *    specified as a xsi-type string representing a DI-mapped resolver key.
+         *    specified as a xsi-type string representing a DI-mapped resolver key or full class path.
          * 2. The resolver is automatically filtered and executed by all available
          *    injected resolvers, each calling the `complies()` method.
          */
@@ -64,15 +67,28 @@ class ComponentResolverManager
         // Check the Magewire blocks cache to find the cached resolver accessor.
         $resolver ??= $cache['blocks'][$this->getBlockCacheKey($block)] ?? null;
 
-        if (is_string($resolver) && $this->hasResolverClassInMapping($resolver)) {
+        if (is_string($resolver)) {
+            if ($this->hasResolverClassInMapping($resolver)) {
+                try {
+                    return $this->createResolverByAccessor($resolver);
+                } catch (NotFoundException $exception) {
+                    $this->logger->info($exception->getMessage(), ['exception' => $exception]);
+                }
+            }
+
+            // If the resolver string wasn't found in the class mapping or instantiation failed,
+            // attempt to resolve the class dynamically and instantiate it if successful.
             try {
-                return $this->createResolverByAccessor($resolver);
+                return $this->createResolverByType($this->getResolverClass($resolver));
             } catch (NotFoundException $exception) {
-                $this->logger->info($exception->getMessage());
+                $log = sprintf('Magewire resolver data value found on block, but "%s" can not be resolved.', $resolver);
+                $this->logger->info($log, ['exception' => $exception]);
             }
         }
 
+        // Last resort: find a resolver that matches the given block.
         try {
+            // @todo Consider prioritizing resolvers instead of always using the first match.
             $resolver = array_key_first(
                 array_filter(
                     $this->resolvers,
@@ -96,22 +112,27 @@ class ComponentResolverManager
         return $resolver;
     }
 
+    public function resolverFactory(): ComponentResolverFactory
+    {
+        return $this->componentResolverFactory;
+    }
+
     /**
      * Create a resolver instance by its accessor.
      *
      * @throws NotFoundException
      */
-    public function createResolverByAccessor(string $resolver, array $data = []): ComponentResolver
+    public function createResolverByAccessor(string $resolver, array $arguments = []): ComponentResolver
     {
-        return $this->createResolverByType($this->getResolverClass($resolver), $data);
+        return $this->createResolverByType($this->getResolverClass($resolver), $arguments);
     }
 
     /**
      * @throws NotFoundException
      */
-    public function createResolverByType(string $class, array $data = []): ComponentResolver
+    public function createResolverByType(string $type, array $arguments = []): ComponentResolver
     {
-        $instance = ObjectManager::getInstance()->create($class, $data);
+        $instance = $this->resolverFactory()->create($type, $arguments);
 
         if ($instance instanceof ComponentResolver) {
             return $instance;
@@ -151,7 +172,7 @@ class ComponentResolverManager
             return $resolver;
         }
 
-        if ($this->resolvers[$resolver]) {
+        if (isset($this->resolvers[$resolver])) {
             if (is_object($this->resolvers[$resolver])) {
                 return $this->resolvers[$resolver]::class;
             }

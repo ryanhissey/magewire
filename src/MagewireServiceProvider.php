@@ -16,37 +16,47 @@ use Psr\Log\LoggerInterface;
 
 class MagewireServiceProvider
 {
-    private bool $booted = false;
+    private State|null $state = null;
 
-    function __construct(
+    public function __construct(
         private readonly Containers $containers,
         private readonly Mechanisms $mechanisms,
         private readonly Features $features,
         private readonly LoggerInterface $logger,
+        private readonly StateFactory $stateFactory,
         private readonly bool $boot = false
     ) {
         //
     }
 
-    public function setup(): void
+    public function setup(Mode $mode = Mode::PRECEDING): void
     {
         if ($this->boot) {
-            $this->boot();
+            $this->boot($mode);
         }
     }
 
-    public function boot(): void
+    public function boot(Mode $mode): void
     {
-        if ($this->booted) {
+        if ($this->state()->isActive()) {
             return;
         }
 
+        // Set boot mode, before we do anything else.
+        $this->state()->mode($mode);
+
+        // Boot service types manually.
         $this->containers->boot();
         $this->mechanisms->boot();
         $this->features->boot();
 
-        // Mark as booted for the current request.
-        $this->booted = true;
+        // Booted up, ready to start.
+        $this->state()->start();
+    }
+
+    public function state(): State
+    {
+        return $this->state ??= $this->stateFactory->create();
     }
 
     public function __call($name, $arguments)
@@ -59,6 +69,10 @@ class MagewireServiceProvider
         /*
          * Enables the possibility to get either a mechanism- or a feature operation type or its
          * belonging facade if it has any attached.
+         *
+         * @todo This lookup can be heavily optimized caching those that are found
+         *       by there $name and when exist as key in a global class array,
+         *       return that type instead of looking it up once again.
          */
         if ($operation) {
             $item = strtolower($matches[count($matches) - 1]);

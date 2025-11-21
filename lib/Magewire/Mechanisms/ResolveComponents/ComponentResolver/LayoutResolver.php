@@ -14,7 +14,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\RuntimeException;
 use Magento\Framework\View\Element\AbstractBlock;
 use Magento\Framework\View\Element\Template;
-use Magento\Framework\View\LayoutInterface;
+use Magento\Framework\View\Layout;
 use Magewirephp\Magewire\Component;
 use Magewirephp\Magewire\Exceptions\ComponentNotFoundException;
 use Magewirephp\Magewire\Mechanisms\HandleComponents\ComponentContext;
@@ -131,12 +131,10 @@ class LayoutResolver extends ComponentResolver
         // Retrieve the layout handles that were stored on the context snapshot.
         $handles = $this->recoverLayoutHandles($snapshot);
         // Build the complete layout structure by processing the recovered handles into renderable blocks.
-        $layout = $this->generateBlocks($handles);
-        // Swap the layout instance with the newly build layout instance.
-        $this->layoutManager->layout($layout);
+        $blocks = $this->generateBlocks($handles);
 
         /** @var Template|false $block */
-        $block = $layout->getBlock($alias ?? $name);
+        $block = $blocks[$alias ?? $name];
 
         if ($block === false) {
             throw new HttpException(
@@ -176,12 +174,27 @@ class LayoutResolver extends ComponentResolver
         return parent::assemble($block, $component);
     }
 
-    /**
-     * @throws LocalizedException
-     */
-    protected function generateBlocks(array $handles): LayoutInterface
+    protected function generateBlocks(array $handles): array
     {
-        return $this->layoutManager->builder()->reset()->withHandles($handles)->build();
+        $layout = $this->layoutManager->singleton();
+
+        /**
+         * Preferably, a total new instance of the layout should be used. But since this singleton is
+         * used all over the place, it's very hard to manage a custom layout and have difference between
+         * the two of them.
+         *
+         * This causes issues all over the place where we've tried to fix it using a Layout Manager
+         * to provide developers with the correct layout object defaulting to the global singleton.
+         *
+         * But testing this for a while, didn't give a strong and solid foundation for future usage.
+         * Therefore, we've decided to go with the global singleton for now.
+         */
+        if ($layout instanceof Layout) {
+            $layout->getUpdate()->addHandle($handles);
+            return $layout->getAllBlocks();
+        }
+
+        throw new \RuntimeException('Unable to generate layout');
     }
 
     protected function isBlock(mixed $block): bool

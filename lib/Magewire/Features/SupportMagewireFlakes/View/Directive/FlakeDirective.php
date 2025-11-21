@@ -17,23 +17,32 @@ use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\ScopeDirectivePa
 class FlakeDirective extends Directive
 {
     #[ScopeDirectiveParser(expressionParserType: ExpressionParserType::FUNCTION_ARGUMENTS)]
-    public function flake(string $arguments): string
+    public function flake(array $arguments): string
     {
-        return <<<DIRECTIVE
-<?php
-\$decoded = unserialize(base64_decode('$arguments'));
-\$variables = get_defined_vars();
+        $arguments = json_encode($arguments);
 
-echo \$__magewire->action('magewire.flake')->execute(
+        return <<<MAGEWIRE_DIRECTIVE
+<?php
+\$variables = get_defined_vars();
+\$arguments = json_decode('$arguments', true);
+
+\$html = \$__magewire->action('magewire.flake')->execute(
     'create',
-    flake: \$decoded['flake'],
-    data: \$decoded['data'] ?? [],
-    metadata: \$decoded['metadata'] ?? [],
-    variables: \$variables
+    flake: \$arguments['flake'],
+    data: \$arguments['data'] ?? [],
+    metadata: \$arguments['metadata'] ?? [],
+    variables: \$arguments
 );
 
-unset(\$decoded, \$fragment, \$variables);
+echo \$__magewire->utils()
+    ->fragment()
+    ->make()
+    ->custom(\Magewirephp\Magewire\Features\SupportMagewireFlakes\View\Fragment\FlakeFragment::class)
+    ->withTags(['magewire', 'flake'])
+    ->wrap(\$html);
+
+unset(\$variables, \$arguments, \$fragment, \$html);
 ?>
-DIRECTIVE;
+MAGEWIRE_DIRECTIVE;
     }
 }

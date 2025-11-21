@@ -12,6 +12,7 @@ namespace Magewirephp\Magewire\Features\SupportMagewireFlakes\View\Action\Magewi
 
 use Magento\Framework\Exception\LocalizedException;
 use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\ViewAction as ViewAction;
+use Magewirephp\Magewire\Features\SupportMagewireFlakes\Component\FlakeFactory;
 use Magewirephp\Magewire\Features\SupportMagewireFlakes\Mechanisms\ResolveComponent\ComponentResolver\FlakeResolver;
 use Magewirephp\Magewire\Support\DataArray;
 use Magewirephp\Magewire\Support\DataArrayFactory;
@@ -19,24 +20,21 @@ use Magewirephp\Magewire\Support\DataArrayFactory;
 class FlakeViewAction extends ViewAction
 {
     public function __construct(
-        private readonly FlakeResolver $flakeResolver,
+        private readonly FlakeFactory $flakeFactory,
         private readonly DataArrayFactory $attributesFactory
     ) {
         //
     }
 
-    /**
-     * @throws LocalizedException
-     */
     public function create(
         string $flake,
         array $data = [],
         array $metadata = [],
         array $variables = []
     ): string {
-        $data = $this->attributesFactory->create()->fill($data)
+        $data = $this->attributesFactory->create()->fill($data);
 
-            ->each(function (DataArray $array, $value, $key) use ($variables) {
+        $data->each(function (DataArray $array, $value, $key) use ($variables) {
                 if (str_starts_with($value, '$')) {
                     $value = trim($value, '$');
 
@@ -44,25 +42,18 @@ class FlakeViewAction extends ViewAction
                         $array->put($key, $variables[$value]);
                     }
                 }
-            })->all();
+            });
 
-        $block = $this->flakeResolver->make($flake, $data);
+        $data  = $data->all();
+        $block = $this->flakeFactory->createByName($flake, $data);
 
         if (! $block) {
-            return '<div></div>'; // TBD
+            return '';
         }
 
         $block->setData('magewire:alias', $flake);
 
-        // Flake metadata.
-        $block->setData('magewire:flake', [
-            'element' => [
-                'attributes' => $metadata['attributes'] ?? []
-            ]
-        ]);
-
         $block->setNameInLayout($data['magewire:name']);
-
         return $block->toHtml();
     }
 }

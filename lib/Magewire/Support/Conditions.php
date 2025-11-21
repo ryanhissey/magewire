@@ -17,17 +17,25 @@ class Conditions
     /** @var array<int|string, callable|array<int|string, callable>> */
     private array $conditions = [];
 
-    /**
-     * @alias validate
-     */
+    public function validate(callable $condition, string|null $name = null): static
+    {
+        return $this->if($condition, $name);
+    }
+
     public function if(callable $condition, string|null $name = null): static
     {
         return $this->set($condition, ConditionEnum::AND, $name);
     }
 
-    public function validate(callable $condition, string|null $name = null): static
+    /**
+     * @alias if
+     */
+    private function set(callable $condition, ConditionEnum $type, string|null $name = null): static
     {
-        return $this->if($condition, $name);
+        $name ?? count($this->get($type));
+        $this->conditions[$type->value][$name] = $condition;
+
+        return $this;
     }
 
     public function and(callable $condition, string|null $name = null): static
@@ -105,17 +113,6 @@ class Conditions
         $type = $this->conditions[$type->value] ?? [];
 
         return $name ? $type[$name] : $type;
-    }
-
-    /**
-     * @alias if
-     */
-    private function set(callable $condition, ConditionEnum $type, string|null $name = null): static
-    {
-        $name ?? count($this->get($type));
-        $this->conditions[$type->value][$name] = $condition;
-
-        return $this;
     }
 
     private function evaluateGroup(array $group, ...$args): bool

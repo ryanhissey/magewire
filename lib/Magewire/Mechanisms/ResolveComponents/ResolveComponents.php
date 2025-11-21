@@ -12,24 +12,44 @@ namespace Magewirephp\Magewire\Mechanisms\ResolveComponents;
 
 use Magento\Framework\View\Element\AbstractBlock;
 use Magewirephp\Magewire\Component;
+use Magewirephp\Magewire\MagewireServiceProvider;
 use Magewirephp\Magewire\Mechanisms\HandleRequests\ComponentRequestContext;
 use Magewirephp\Magewire\Exceptions\ComponentNotFoundException;
 use Magewirephp\Magewire\Mechanisms\HandleComponents\ComponentContext;
 use Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\ComponentResolverManager;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\Management\LayoutManager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Magewirephp\Magewire\on;
 
 class ResolveComponents
 {
     public function __construct(
-        private readonly ComponentResolverManager $componentResolverManagement
+        private readonly ComponentResolverManager $componentResolverManagement,
+        private readonly MagewireServiceProvider $magewireServiceProvider,
+        private readonly LayoutManager $layoutManager
     ) {
         //
     }
 
     public function boot(): void
     {
-        on('magewire:construct', function (AbstractBlock $block) {
+        /*
+         * IMPORTANT: by default, the layout singleton is bound onto a page by the given route. This singleton pattern
+         * is being used systemwide throughout Magento (opinions aside).
+         *
+         * The problem here is, Magewire needs to be able to tell the layout singleton that it is allowed to fetch
+         * dynamic, page unrelated, blocks based on any given layout handle(s).
+         *
+         * This means, unless there is a better way that it needs a customized Generator Pool and a
+         * new builder that can make sure this is available only during subsequent Magewire requests.
+         */
+        if ($this->magewireServiceProvider->state()->mode()->isSubsequent()) {
+            $this->layoutManager->decorator()->decorateForPagelessBlockFetching(
+                $this->layoutManager->singleton()
+            );
+        }
+
+        on('magewire:component:construct', function (AbstractBlock $block) {
             return $this->build(function () use ($block): array {
                 $resolver = $this->componentResolverManagement->resolve($block);
                 $block = $resolver->construct($block);
@@ -38,7 +58,7 @@ class ResolveComponents
             });
         });
 
-        on('magewire:reconstruct', function (ComponentRequestContext $request) {
+        on('magewire:component:reconstruct', function (ComponentRequestContext $request) {
             if (! $this->componentResolverManagement->hasResolverClassInMapping($request->getSnapshot()->getMemoValue('resolver'))) {
                 throw new HttpException(400);
             }

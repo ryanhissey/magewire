@@ -12,7 +12,6 @@ namespace Magewirephp\Magewire;
 
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\NotFoundException;
-use Magento\Framework\View\Element\Block\ArgumentInterface;
 
 /**
  * The ServiceType class provides a structured way to manage and organize different operation types
@@ -22,6 +21,8 @@ use Magento\Framework\View\Element\Block\ArgumentInterface;
 abstract class ServiceType
 {
     private bool $booted = false;
+
+    private int $sortOrder = 0;
 
     /**
      * @param array<string, string|array> $items
@@ -90,7 +91,7 @@ abstract class ServiceType
     {
         $name = preg_replace('/(?<!^)[A-Z]/', '_$0', $name);
 
-        // WIP: could maybe be made a little more strict checking ArgumentInterface?
+        // @todo Could maybe be made a little more strict checking ArgumentInterface?
         if (isset($this->items[$name]['view_model'])) {
             return $this->items[$name]['view_model'];
         }
@@ -119,10 +120,15 @@ abstract class ServiceType
                 }
             }
 
+            if ($item['sort_order'] ?? false) {
+                $this->sortOrder = (int) $item['sort_order'];
+            } else {
+                $this->sortOrder++;
+                $item['sort_order'] = $this->sortOrder;
+            }
+
             // Ensure the facade key exists, defaulting to null if not set.
             $item['facade'] ??= null;
-            // Ensure each item has a numeric sort order, defaulting to 0.
-            $item['sort_order'] = (int) ($item['sort_order'] ?? 0);
             // Keep only active sequences (where the value is true).
             $item['sequence'] = array_filter($item['sequence'] ?? [], fn ($item) => $item === true);
             // Ensure the view model key exists, defaulting to null if not set.

@@ -125,7 +125,7 @@ abstract class Compiler
         $result = '';
 
         // Try to run the precompiler pipeline.
-        $value = $this->precompiler()->run($value);
+        $value = $this->precompiler()->run($value, true);
 
         /*
          * Iterate through all tokens returned by the Zend lexer, parsing each into valid PHP code.

@@ -37,10 +37,10 @@ class SupportMagentoObserverEvents extends ComponentHook
          */
         $events = [
             // Lifecycle events.
-            'magewire:construct',
-            'magewire:precompile',
-            'magewire:compiled',
-            'magewire:reconstruct',
+            'magewire:component:construct',
+            'magewire:view:precompile',
+            'magewire:view:compiled',
+            'magewire:component:reconstruct',
 
             'pre-mount',
             'mount.stub',

@@ -10,18 +10,20 @@ declare(strict_types=1);
 
 namespace Magewirephp\Magewire\Support\Concerns;
 
+use InvalidArgumentException;
 use Magento\Framework\App\ObjectManager;
 
-/**
- * WIP...
- */
 trait WithFactory
 {
     /**
      * Returns a new instance of the current object.
      */
-    public function newInstance(array $arguments = []): static
+    public function newInstance(array $arguments = [], string|null $type = null): static
     {
-        return ObjectManager::getInstance()->create(static::class, $arguments);
+        if ($type && ! class_exists($type)) {
+            throw new InvalidArgumentException(sprintf('Class %s does not exist', $type));
+        }
+
+        return ObjectManager::getInstance()->create($type ?? static::class, $arguments);
     }
 }

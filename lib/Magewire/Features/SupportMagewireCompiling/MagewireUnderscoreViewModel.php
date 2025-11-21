@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Magewirephp\Magewire\Features\SupportMagewireCompiling;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
+use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\DirectiveHandover;
 use Magewirephp\Magewire\Features\SupportMagewireCompiling\View\Management\ActionManager;
 use Magewirephp\Magewire\Model\View\Utils;
 use Magewirephp\Magewire\Support\DataScope;
@@ -20,7 +21,8 @@ class MagewireUnderscoreViewModel implements ArgumentInterface
     public function __construct(
         private readonly ActionManager $actionManager,
         private readonly DataScope $arguments,
-        private readonly Utils $utils
+        private readonly Utils $utils,
+        private readonly DirectiveHandover $directiveHandover
     ) {
         //
     }
@@ -33,6 +35,11 @@ class MagewireUnderscoreViewModel implements ArgumentInterface
     public function arguments(): DataScope
     {
         return $this->arguments;
+    }
+
+    public function handover(): DirectiveHandover
+    {
+        return $this->directiveHandover;
     }
 
     public function utils(): Utils

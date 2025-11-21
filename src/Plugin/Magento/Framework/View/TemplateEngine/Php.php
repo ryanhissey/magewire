@@ -74,7 +74,7 @@ class Php
                     // The developer hooking into this event is responsible for pre-compilation.
                     // They must ensure that the callback they return provides an array containing
                     // $block, $filename, and $dictionary, as required by this plugin.
-                    $precompile = trigger('magewire:precompile', $block, $filename, $dictionary, $magewire);
+                    $precompile = trigger('magewire:view:precompile', $block, $filename, $dictionary, $magewire);
 
                     $return = ['block' => $block, 'filename' => $filename, 'dictionary' => $dictionary];
                     $result = $precompile($return);
@@ -107,7 +107,7 @@ class Php
             // The developer hooking into this event is responsible for compilation.
             // They must ensure that the callback returns a string containing the final HTML,
             // which is represented by the $html variable.
-            $finish = trigger('magewire:compiled', $latest);
+            $finish = trigger('magewire:view:compiled', $latest);
 
             return $finish($html);
         }

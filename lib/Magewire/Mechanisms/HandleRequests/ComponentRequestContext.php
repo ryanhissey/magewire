@@ -55,7 +55,7 @@ class ComponentRequestContext
         return $this;
     }
 
-    function getUpdates(): array
+    public function getUpdates(): array
     {
         return $this->updates;
     }

@@ -162,8 +162,8 @@
                 <block name="magewire.features.support-magewire-rate-limiting"
                        template="Magewirephp_Magewire::js/magewire/features/support-magewire-rate-limiting/support-magewire-rate-limiting.phtml"
                 />
-                <block name="magewire.features.support-backward-compatibility"
-                       template="Magewirephp_Magewire::js/magewire/features/support-backward-compatibility/support-backward-compatibility.phtml"
+                <block name="magewire.features.support-magewire-backwards-compatibility"
+                       template="Magewirephp_Magewire::js/magewire/features/support-magewire-backwards-compatibility/support-magewire-backwards-compatibility.phtml"
                 />
             </container>
 

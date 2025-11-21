@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Magewirephp\Magewire\Observer;
 
 use Exception;
+use Magewirephp\Magewire\Mode;
 use function Magewirephp\Magewire\store;
 use function Magewirephp\Magewire\trigger;
 use Magento\Framework\Event\Observer;
@@ -68,9 +69,9 @@ class ViewBlockAbstractToHtmlBefore implements ObserverInterface
                  *
                  * @see \Magewirephp\Magewire\Controller\Router
                  */
-                $this->magewireServiceProvider->boot();
+                $this->magewireServiceProvider->boot(Mode::PRECEDING);
 
-                $construct = trigger('magewire:construct', $block);
+                $construct = trigger('magewire:component:construct', $block);
                 $block = $construct();
 
                 $this->handleMount($block);

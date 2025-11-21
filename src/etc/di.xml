@@ -9,6 +9,9 @@
     <preference for="Magewirephp\Magewire\Support\DataScope\Compiler"
                 type="Magewirephp\Magewire\Support\DataScope\Compiler\RecursiveArray"
     />
+    <preference for="Magewirephp\Magewire\Mechanisms\ResolveComponents\Layout\LayoutDecorator"
+                type="Magewirephp\Magewire\Mechanisms\ResolveComponents\Layout\MagewireLayoutDecorator"
+    />
 
     <!-- Magewire Mechanisms -->
 

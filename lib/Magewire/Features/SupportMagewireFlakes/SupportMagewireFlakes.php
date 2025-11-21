@@ -10,41 +10,15 @@ declare(strict_types=1);
 
 namespace Magewirephp\Magewire\Features\SupportMagewireFlakes;
 
-use Magento\Framework\View\Element\AbstractBlock;
 use Magewirephp\Magewire\Component;
 use Magewirephp\Magewire\ComponentHook;
-use Magewirephp\Magewire\Features\SupportMagewireFlakes\View\Fragment\FlakeFragmentFactory;
 use Magewirephp\Magewire\Mechanisms\HandleComponents\ComponentContext;
 use function Magewirephp\Magewire\on;
 
 class SupportMagewireFlakes extends ComponentHook
 {
-    public function __construct(
-        private readonly FlakeFragmentFactory $flakeFragmentFactory
-    ) {
-        //
-    }
-
-    function provide(): void
+    public function provide(): void
     {
-        on('render', function (Component $component, AbstractBlock $block) {
-            return function (string $html) use ($block) {
-                $metadata = $block->getData('magewire:flake');
-
-                if (is_array($metadata)) {
-                    $fragment = $this->flakeFragmentFactory->create();
-
-                    if (is_array($metadata['element'] ?? null)) {
-                        $fragment->withAttributes($metadata['element']['attributes']);
-                    }
-
-                    return $fragment->wrap($html);
-                }
-
-                return $html;
-            };
-        });
-
         on('hydrate', function (Component $component, array $memo) {
             $block = $component->block();
 

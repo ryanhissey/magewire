@@ -10,35 +10,38 @@ declare(strict_types=1);
 
 namespace Magewirephp\Magewire\Mechanisms\ResolveComponents\Management;
 
+use Magento\Framework\View\LayoutFactory;
 use Magento\Framework\View\LayoutInterface;
-use Magewirephp\Magento\View\LayoutBuilder;
+use Magewirephp\Magewire\Mechanisms\ResolveComponents\Layout\LayoutDecorator;
 
 class LayoutManager
 {
     public function __construct(
-        private LayoutInterface $layout,
-        protected readonly LayoutBuilder $builder
+        private readonly LayoutInterface $layout,
+        private readonly LayoutFactory $factory,
+        private readonly LayoutDecorator $decorator
     ) {
         //
     }
 
     /**
-     * Set or get the global layout instance to use when trying to retrieve blocks.
+     * Returns the global layout singleton.
      */
-    public function layout(LayoutInterface|null $layout = null): LayoutInterface
+    public function singleton(): LayoutInterface
     {
-        if ($layout) {
-            $this->layout = $layout;
-        }
-
         return $this->layout;
     }
 
     /**
-     * Returns the Magewire layout builder.
+     * Returns a new Layout instance.
      */
-    public function builder(): LayoutBuilder
+    public function factory(): LayoutFactory
     {
-        return $this->builder;
+        return $this->factory;
+    }
+
+    public function decorator(): LayoutDecorator
+    {
+        return $this->decorator;
     }
 }

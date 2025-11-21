@@ -8,12 +8,12 @@
 
 declare(strict_types=1);
 
-namespace Magewirephp\Magento\View\Layout;
+namespace Magewirephp\Magento\Framework\View\Layout;
 
 use Magento\Framework\App\State;
 use Magento\Framework\View\Layout\Condition\ConditionFactory;
 use Magento\Framework\View\Layout\ScheduledStructure;
-use Magewirephp\Magento\View\Layout\ScheduledStructure\Helper as MagewireLayoutScheduledStructureHelper;
+use Magewirephp\Magento\Framework\View\Layout\ScheduledStructure\Helper as MagewireLayoutScheduledStructureHelper;
 use Psr\Log\LoggerInterface;
 
 class GeneratorPool extends \Magento\Framework\View\Layout\GeneratorPool

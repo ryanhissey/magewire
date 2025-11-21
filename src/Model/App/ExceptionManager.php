@@ -9,10 +9,9 @@ declare(strict_types=1);
 namespace Magewirephp\Magewire\Model\App;
 
 use Exception;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\View\Element\AbstractBlock;
-use Magewirephp\Magewire\Controller\MagewireUpdateRoute;
 use Magewirephp\Magewire\Exceptions\SilentException;
+use Magewirephp\Magewire\MagewireServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -28,10 +27,10 @@ class ExceptionManager
      * @param array<Exception::class,'subsequent'|'predecing', AbstractExceptionHandler|array<Exception::class, AbstractExceptionHandler>> $specificExceptionHandlerPool
      */
     function __construct(
-        private readonly RequestInterface $request,
         private readonly LoggerInterface $logger,
         private readonly AbstractExceptionHandler $precedingHandler,
         private readonly AbstractExceptionHandler $subsequentHandler,
+        private readonly MagewireServiceProvider $magewireServiceProvider,
         private readonly array $specificExceptionHandlerPool = []
     ) {
         //
@@ -42,7 +41,7 @@ class ExceptionManager
      */
     function handle(Exception $exception, bool $log = true): callable|null
     {
-        $subsequent = $this->request->getParam(MagewireUpdateRoute::PARAM_IS_SUBSEQUENT, false);
+        $subsequent = $this->magewireServiceProvider->state()->mode()->isSubsequent();
 
         try {
             $exception = $this->resolveExceptionHandler($exception, $subsequent)->handle($exception, $subsequent);
@@ -68,7 +67,7 @@ class ExceptionManager
      */
     function handleWithBlock(AbstractBlock $block, Exception $exception, bool $log = true): AbstractBlock
     {
-        $subsequent = $this->request->getParam(MagewireUpdateRoute::PARAM_IS_SUBSEQUENT, false);
+        $subsequent = $this->magewireServiceProvider->state()->mode()->isSubsequent();
 
         if ($subsequent) {
             $this->handle($exception, $log);

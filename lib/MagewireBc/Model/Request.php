@@ -9,6 +9,7 @@
 namespace Magewirephp\Magewire\Model;
 
 use Magewirephp\Magewire\Controller\MagewireUpdateRoute;
+use Magewirephp\Magewire\MagewireServiceProvider;
 
 /**
  * @deprecated
@@ -16,7 +17,8 @@ use Magewirephp\Magewire\Controller\MagewireUpdateRoute;
 class Request implements RequestInterface
 {
     public function __construct(
-        private readonly \Magento\Framework\App\RequestInterface $request
+        private readonly \Magento\Framework\App\RequestInterface $request,
+        private readonly MagewireServiceProvider $magewireServiceProvider
     ) {
         //
     }
@@ -68,7 +70,7 @@ class Request implements RequestInterface
 
     public function isSubsequent(bool $flag = null, bool $force = false)
     {
-        return $this->request->getParam(MagewireUpdateRoute::PARAM_IS_SUBSEQUENT, false);
+        return $this->magewireServiceProvider->state()->mode()->isSubsequent();
     }
 
     public function isPreceding(): bool
