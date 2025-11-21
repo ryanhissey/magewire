@@ -63,12 +63,10 @@
       --color-blue-600: oklch(54.6% .245 262.881);
       --color-gray-600: oklch(44.6% .03 256.802);
       --color-gray-700: oklch(37.3% .034 259.733);
-      --color-gray-800: oklch(27.8% .033 256.848);
       --color-black: #000;
       --color-white: #fff;
       --spacing: .25rem;
       --container-xs: 20rem;
-      --container-sm: 24rem;
       --text-xs: .75rem;
       --text-xs--line-height: calc(1 / .75);
       --text-sm: .875rem;
@@ -657,12 +655,8 @@
 }
 
 .magewire-notifier__notification {
-  pointer-events: auto;
-  width: 100%;
-  max-width: var(--container-sm);
   --tw-translate-y: calc(var(--spacing) * 0);
   translate: var(--tw-translate-x) var(--tw-translate-y);
-  transform: var(--tw-rotate-x, ) var(--tw-rotate-y, ) var(--tw-rotate-z, ) var(--tw-skew-x, ) var(--tw-skew-y, );
   border-radius: var(--radius-md);
   border-left-style: var(--tw-border-style);
   opacity: 1;
